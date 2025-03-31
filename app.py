@@ -1,15 +1,15 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS  # Import CORS
 import pickle
 import pandas as pd
 import numpy as np
 import logging
 from preprocess import preprocess_input
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = Flask(__name__)
-
+CORS(app)  # Enable CORS for all routes
 
 try:
     with open("model.pkl", "rb") as file:
@@ -18,7 +18,6 @@ try:
 except Exception as e:
     logging.error(f"Error loading model: {e}")
     model = None
-
 
 fertilizer_mapping = {
     1: "Urea", 2: "DAP", 3: "MOP", 4: "10:26:26 NPK", 5: "SSP",
@@ -36,7 +35,6 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        
         if request.content_type == "application/json":
             data = request.get_json()
         else:
@@ -44,7 +42,6 @@ def predict():
 
         logging.info(f"Received Data: {data}")
 
-        
         required_fields = ["district", "soil_color", "nitrogen", "phosphorus", "potassium", "pH", "rainfall", "temperature", "crop"]
         missing_fields = [field for field in required_fields if field not in data or data[field] == ""]
 
@@ -52,7 +49,6 @@ def predict():
             logging.error(f"Missing fields: {missing_fields}")
             return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
 
-    
         try:
             processed_data = {
                 "District_Name": data["district"],
@@ -69,23 +65,18 @@ def predict():
             logging.error(f"Invalid input type: {ve}")
             return jsonify({"error": "Invalid input: Ensure all numerical values are valid."}), 400
 
-        
         if model is None:
             logging.error("Model is not loaded.")
             return jsonify({"error": "Model is not available."}), 500
 
-        
         df = preprocess_input(processed_data)
         prediction = model.predict(df)[0]
 
-        
         if isinstance(prediction, np.generic):
             prediction = prediction.item()
 
-        
         logging.info(f"Raw Model Prediction: {prediction}")
 
-        
         fertilizer_name = fertilizer_mapping.get(prediction, "Unknown Fertilizer")
         logging.info(f"Mapped Fertilizer: {fertilizer_name}")
 
