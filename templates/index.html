@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fertilizer Recommendation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Fertilizer Recommendation System</h2>
+        <form id="fertilizerForm">
+            <input type="text" name="district" placeholder="District Name" required>
+            <input type="text" name="soil_color" placeholder="Soil Color" required>
+            <input type="number" name="nitrogen" placeholder="Nitrogen (N)" required>
+            <input type="number" name="phosphorus" placeholder="Phosphorus (P)" required>
+            <input type="number" name="potassium" placeholder="Potassium (K)" required>
+            <input type="number" name="pH" step="0.1" placeholder="pH Level" required>
+            <input type="number" name="rainfall" placeholder="Rainfall (mm)" required>
+            <input type="number" name="temperature" placeholder="Temperature (°C)" required>
+            <input type="text" name="crop" placeholder="Crop Type" required>
+            <button type="submit">Predict</button>
+        </form>
+        <h3 id="result"></h3>
+    </div>
+
+    <script>
+        document.getElementById("fertilizerForm").onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const response = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+            document.getElementById("result").innerText = 
+                data.recommended_fertilizer ? `Recommended Fertilizer: ${data.recommended_fertilizer}` : "Error in prediction";
+        };
+    </script>
+</body>
+</html>
