@@ -4,6 +4,7 @@ import pickle
 import pandas as pd
 import numpy as np
 import logging
+
 from preprocess import preprocess_input
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
